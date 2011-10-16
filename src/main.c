@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "ae.h"
 #include "anet.h"
 
