@@ -1,0 +1,8 @@
+A simple event-driven network library.
+This code comes from redis,including:
+  * ae.c
+  * ae_epoll.c
+  * ae_kqueque.c
+  * ae_select.c
+  * anet.c
+  * zmalloc.c 
