@@ -26,100 +26,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#include "anet.h"
-#include "ae.h"
-#include "request.h"
 #include "response.h"
 
-#define GET "get"
-#define SET "set"
-
-struct server{
-	char *bindaddr;
-	int port;
-	int fd;
-
-	aeEventLoop *el;
-
-	char neterr[1024];
-};
-
-struct server _svr;
-
-void _ReadHandler(aeEventLoop *el, int fd, void *privdata, int mask)
+struct response *response_new(int argc,int status)
 {
-	char buf[1024];
-	char sent_buf[1024];
-	int nread;
+	struct response *res;
+	res=calloc(1,sizeof(struct response));
+	res->argv=calloc(argc,sizeof(char*));
+	res->argc=argc;
+	res->status=status;
+	return res;
+}
 
-	nread=read(fd,buf,1024);
-	if(nread==-1)
-		return;
+void response_detch(struct response *res,char *ackbuf)
+{
+	int i;
+	if(res->status==200)
+		strcat(ackbuf,"+OK\r\n");
+	else
+		strcat(ackbuf,"-OK\r\n");
 
-	if(nread==0){
-		return;
-	}else{
-		int ret;
-		struct request *req=request_new(buf);
-		struct response *resp;
-		ret=request_parse(req);
-		if(ret){
-			request_dump(req);
-			if(strcmp(req->argv[0],GET)){
-				/*to do nessDB's get*/
-			}else if(strcmp(req->argv[0],SET)){
-				/*to do nessDB's set*/
-			}
-			/*and others operations*/
-			resp=response_new(1,200);
-			resp->argv[0]="wow,nessDB";
+	for(i=0;i<res->argc;i++){
+		char ls[16]={0};
+		int l=strlen(res->argv[i]);
+		sprintf(ls,"$%d\r\n",l);
+		strcat(ackbuf,ls);
 
-			response_detch(resp,sent_buf);
-			response_dump(resp);
-			write(fd,sent_buf,strlen(sent_buf));
-
-			response_free(resp);
-
-		}
-		request_free(req);
+		strcat(ackbuf,res->argv[i]);
+		strcat(ackbuf,"\r\n");
 	}
 }
 
-void _AcceptHandler(aeEventLoop *el, int fd, void *privdata, int mask) 
+void response_dump(struct response *res)
 {
-	printf("accept:%d\n",fd);
-
-	int cport, cfd;
-    	char cip[128];
-   	cfd = anetTcpAccept(_svr.neterr,fd,cip,&cport);
-	if (cfd == AE_ERR) {
-		printf("accept....\n");
+	int i;
+	if(!res)
 		return;
+
+	printf("response-dump--->");
+	printf("argc:<%d>\n",res->argc);
+	for(i=0;i<res->argc;i++){
+		printf("		argv[%d]:<%s>\n",i,res->argv[i]);
 	}
-
-	aeCreateFileEvent(_svr.el,cfd,AE_READABLE,_ReadHandler,NULL);
+	printf("\n");
 }
 
-int main()
+void response_free(struct response *res)
 {
-	_svr.bindaddr="127.0.0.1";
-	_svr.port=6379;
-	
-	_svr.el=aeCreateEventLoop();
-	_svr.fd=anetTcpServer(_svr.neterr,_svr.port,_svr.bindaddr);
-
-	//handler
- 	if (aeCreateFileEvent(_svr.el, _svr.fd, AE_READABLE,_AcceptHandler, NULL) == AE_ERR) 
-		printf("creating file event");
-
-	aeMain(_svr.el);
-	printf("oops,exit\n");
-	aeDeleteEventLoop(_svr.el);
-	return 1;
+	if(res){
+		free(res->argv);
+	}
 }
+
+
+
