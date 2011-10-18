@@ -1,19 +1,21 @@
 CC = gcc 
 CFLAGS = -Wall -g
 
-OBJS = ae.o zmalloc.o anet.o main.o
+OBJS = ae.o  anet.o request.o zmalloc.o
+SVR_OBJS= svr.o
 
-all :x
+all :svr
 
-x : $(OBJS)
-	$(CC) $(CFLAGS) -o main $^
+svr : $(OBJS) $(SVR_OBJS)
+	$(CC) $(CFLAGS) -o svr $^
+
 
 %.o : %.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 
 
 clean :
-	rm -rf *.o main
+	rm -rf $(OBJS) $(SVR_OBJS) svr
 
 
 
