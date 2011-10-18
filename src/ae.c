@@ -43,13 +43,17 @@
 /* Include the best multiplexing layer supported by this system.
  * The following should be ordered by performances, descending. */
 #ifdef HAVE_EPOLL
-#include "ae_epoll.c"
+	#include "ae_epoll.c"
 #else
-    #ifdef HAVE_KQUEUE
-    #include "ae_kqueue.c"
-    #else
-    #include "ae_select.c"
-    #endif
+	#ifdef HAVE_KQUEUE
+	#include "ae_kqueue.c"
+	#else
+	#ifdef _WIN32
+		#include "ae_ws2.c"
+	#else
+		#include "ae_select.c"
+	#endif
+	#endif
 #endif
 
 aeEventLoop *aeCreateEventLoop(void) {
