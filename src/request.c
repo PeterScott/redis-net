@@ -33,7 +33,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "zmalloc.h"
 #include "request.h"
 
 /* useful symbols:
@@ -147,7 +146,7 @@ int request_parse(struct request *req)
 	}
 	req->argc=atoi(sb);
 
-	req->argv=(char**)zmalloc(sizeof(char*)*req->argc);
+	req->argv=(char**)calloc(req->argc,sizeof(char*));
 	for(i=0;i<req->argc;i++){
 		int argv_len;
 		char *v;
@@ -161,7 +160,7 @@ int request_parse(struct request *req)
 		argv_len=atoi(sb);
 
 		/*get argv*/
-		v=(char*)zmalloc(sizeof(char)*argv_len);
+		v=(char*)malloc(sizeof(char)*argv_len);
 		memcpy(v,req->querybuf+(req->pos),argv_len);
 		req->argv[i]=v;	
 		req->pos+=(argv_len+2);
@@ -189,9 +188,9 @@ void request_free(struct request *req)
 	if(req){
 		for(i=0;i<req->argc;i++){
 			if(req->argv[i])
-				zfree(req->argv[i]);
+				free(req->argv[i]);
 		}
-		zfree(req->argv);
+		free(req->argv);
 		free(req);
 	}
 }
