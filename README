@@ -1,4 +1,4 @@
-A simple event-driven network library.
+A simple event-driven network library and supports Redis-Protocol parse with DFA.
 This code comes from redis,including:
   * ae.c
   * ae_epoll.c
@@ -6,3 +6,18 @@ This code comes from redis,including:
   * ae_select.c
   * anet.c
   * zmalloc.c 
+
+
+ Redis-Protocol parse
+ ===================
+  * request.c
+
+
+  How to do
+  ========
+  $cd src
+  $make
+  $./svr
+
+  use redis-cli to connect it and enjoy.
+  Drafted by BohuTANG, you can contact me with <overred.shuttler at gmail dot com>
