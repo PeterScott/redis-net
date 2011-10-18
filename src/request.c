@@ -36,7 +36,10 @@
 #include "zmalloc.h"
 #include "request.h"
 
-
+/* useful symbols:
+ * '*' and '$' states are:3
+ * '0' '1' '2' '3' '4' '5' '6' '7' '8' '9';states are 2
+ */
 //==============================DFA states=================================//
 unsigned char _table[256]={
 /*   0 nul    1 soh    2 stx    3 etx    4 eot    5 enq    6 ack    7 bel  */
@@ -112,7 +115,7 @@ int req_state_len(struct request *req,char *sb)
 					return STATE_FAIL;
 			default:
 				if(first==1){
-					/* the first symbol is not '*'*/
+					/* the first symbol is not '*' or '$'*/
 					if(_table[(unsigned char)c]!=3)
 						return STATE_FAIL;
 				}else{
@@ -152,7 +155,7 @@ int request_parse(struct request *req)
 		/*parse argv len*/
 		memset(sb,0,BUF_SIZE);
 		if(req_state_len(req,sb)!=STATE_CONTINUE){
-			fprintf(stderr,"argv_len format ***ERROR***,packet:%s",sb);
+			fprintf(stderr,"argv's length format ***ERROR***,packet:%s",sb);
 			return 0;
 		}
 		argv_len=atoi(sb);
